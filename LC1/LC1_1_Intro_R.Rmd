@@ -622,7 +622,11 @@ rbind(L1, t(L2))
 ### Q7  can you now select all cars that drove more that 30 kilometers in distance?
 ***
 ```{r}
+twenties = subset(cars, cars$speed==20)
+twenties
 
+thirties_above = subset(cars, cars$dist>=30)
+thirties_above
 ```
 
 ***
