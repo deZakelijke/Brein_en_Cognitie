@@ -2,16 +2,11 @@
 title: "Brein & Cognitie"
 author: "Wouter van den Bos"
 output:
-  word_document: default
   pdf_document: default
   html_document: default
+  word_document: default
 ---
 
-***
-```{R}
-## set working direcotry
-setwd("~/Brein_en_Cognitie/LC1/") ##<======= SET THIS TO YOUR LC1 FOLDER!
-```
 
 ```{r, eval=FALSE}
 
@@ -221,7 +216,7 @@ We can also construct a grid by combining to vectors using __expand.grid__
 This can be usefull when you want to test a function for a combination of parameters
 ```{r}
 xgrid <- seq(1,3,1) # short for of seq
-xygrid <- seq(-2,0,1)
+ygrid <- seq(-2,0,1)
 grid <- expand.grid(xgrid, ygrid) # not limited to 2D can be longer list of lists
 grid
 ```
