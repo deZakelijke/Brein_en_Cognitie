@@ -9,7 +9,6 @@ output:
 
 ## ANSWER SECTION
 
-
 ### Q1 Try _?log_ to read how to use log function. What are the two ways to calculate the log of 10 using base 10?
 
 
