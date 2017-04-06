@@ -589,7 +589,7 @@ x
 ***
 
 ```{r}
-set.seed(1337)
+set.seed(777)
 rr = runif(100, 0, 1)
 
 max(rr)
@@ -612,6 +612,7 @@ abline(lsfit(1:100, rr))
 ### Q6 Below are two lists, can you combine them using __rbind__, if not, why not and how could you change that?
 L1 and L2 do not have the same dimensions. This can be fixed by transposing either of the two.
 ***
+
 ```{r}
 L1 = matrix( c(2, 4, 3, 1, 5, 7), nrow=2, ncol=3, byrow = TRUE)
 L2  = matrix( c(2, 4, 3, 1, 5, 7), nrow=3, ncol=2, byrow = F)
@@ -631,8 +632,7 @@ thirties_above
 ***
 ### Q8  can you use ifelse to tell for each element in the following list if it is even or odd ? (hint modulo: x %% y)
 ***
-```{r}
-
-    
-  
+```{r, eval=T}
+a = c(5,7,2,9)
+ifelse(a%%2,'odd', 'even')
 ```
