@@ -221,7 +221,7 @@ We can also construct a grid by combining to vectors using __expand.grid__
 This can be usefull when you want to test a function for a combination of parameters  
 ```{r}
 xgrid <- seq(1,3,1) # short for of seq
-ygrid <- seq(-2,0,1)
+xygrid <- seq(-2,0,1)
 grid <- expand.grid(xgrid, ygrid) # not limited to 2D can be longer list of lists
 grid
 ```
@@ -304,6 +304,8 @@ rr =runif(100, 0, 1) # generates 100 random numbers between 0 and 1. unif indica
 ### Q4 find the minimum and maximum of the random numbers you just generated, and also the position in the list:
 ***  
 
+```{r}
+```
 
   ***
 ### Q5 try to plot all random numbers using __plot()__ and identify the min and max in it using __abline()__ to add (h)orizontal and (v)ertical lines  
@@ -555,36 +557,73 @@ x<-read.csv(file.choose()) # open dialog to open a csv file.
 
 
 ***
-
 ### Q1 Try _?log_ to read how to use log function. What are the two ways to calculate the log of 10 using base 10?
+***
+```{r}
+log10(200)
+log(200)/log(10)
+```
+
   
   
 ***  
-  
 ### Q2 if you assing an integer value to a variable ( e.g. k = 1), will the data value also be integer  
+***
+```{r}
+
+```
 
 
 ***  
 
-  ### Q3 the __seq__ function is very useful ot make sequences of numbers, which will be saved as vectors. Look up how __seq__ works and make a sequence starting at 0 ending at 100 in steps of 2?  
-  
+### Q3 the __seq__ function is very useful ot make sequences of numbers, which will be saved as vectors. Look up how __seq__ works and make a sequence starting at 0 ending at 100 in steps of 2?  
+***
+```{r}
 
+```
+
+  
+  
 *** 
 ### Q4 find the minimum and maximum of the random numbers you just generated, and also the position in the list:
- 
- 
+***
+```{r}
+
+
+```
+
+
 ***
 ### Q5 try to plot all random numbers using __plot()__ and identify the min and max in it using __abline()__ to add (h)orizontal and (v)ertical lines 
 (hint: use ?plot and ?abline)  
+***
+```{r}
+
+```
+
 
  
 ***
 ### Q6 Below are two lists, can you combine them using __rbind__, if not, why not and how could you change that? 
+***
+```{r}
+
+```
+
 
 
 ***
 ### Q7  can you now select all cars that drove more that 30 kilometers in distance? 
+***
+```{r}
+
+```
 
 
 ***
 ### Q8  can you use ifelse to tell for each element in the following list if it is even or odd ? (hint modulo: x %% y)
+***
+```{r}
+
+```
+
