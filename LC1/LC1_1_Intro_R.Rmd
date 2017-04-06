@@ -562,6 +562,7 @@ x<-read.csv(file.choose()) # open dialog to open a csv file.
 ```{r}
 log10(200)
 log(200)/log(10)
+log(200, base=10)
 ```
 
   
@@ -570,7 +571,8 @@ log(200)/log(10)
 ### Q2 if you assing an integer value to a variable ( e.g. k = 1), will the data value also be integer  
 ***
 ```{r}
-
+set.seed(123)
+rr = 
 ```
 
 
@@ -605,9 +607,12 @@ log(200)/log(10)
  
 ***
 ### Q6 Below are two lists, can you combine them using __rbind__, if not, why not and how could you change that? 
+L1 and L2 do not have the same dimensions. This can be fixed by transposing either of the two. 
 ***
 ```{r}
-
+L1 = matrix( c(2, 4, 3, 1, 5, 7), nrow=2, ncol=3, byrow = TRUE)        
+L2  = matrix( c(2, 4, 3, 1, 5, 7), nrow=3, ncol=2, byrow = F)  
+rbind(L1, t(L2))
 ```
 
 
