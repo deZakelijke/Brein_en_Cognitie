@@ -232,7 +232,7 @@ __hint 2__: use ylim = c(-2,12)
   
 
 Ebbinghaus proposed the following equation to best described how savings change over time:  
-$$  Q(t) = u1 / ((log(t))^a1 + u1), $$
+$$  Q(t) = u1 / ((log(t))^{a1}+ u1), $$
 where the u1 and a1 are free parameters and log is taken with base 10. Q(t) are the savings at time interval t. Note that he calculated the best fitting parameters by hand, using __minutes__ for the time interval. According to these calculations he suggested that u1= 1.84 and a1 = 1.25 were the best fitting parameters.  
 
 
@@ -240,13 +240,15 @@ where the u1 and a1 are free parameters and log is taken with base 10. Q(t) are 
 
 
 Later the simpler exponental function has been proposed which is described by the equation   
-$$  Q(t)=(1+u1*t)^-a1 $$   
+$$  Q(t)=(1+u1*t)^{-a1} $$   
+
 where Q(t) is savings at time t and μ1 and a1 are parameters.   
 
 first lets import some real data: 
 ```{r}
 #importing data
 ebbing_data <- read.delim("Ebbinghaus.txt",header= TRUE, sep = "\t") # open a file, will be stored as data.frame
+
 ```
 
 
@@ -258,15 +260,23 @@ __hint__ : use method="L-BFGS-B", upper=10, lower=-10 and c(2,1) as starting val
 ```{r}
 ## ANSWER
 ebbinghaus<- function(data,v){
-
+    time = data$Interval_s/60
+    return (c(v[1]/(log10(time)^v[2] - v[1])))
 }
 
 simple_exponential<- function(data,v){
-
+    time = data$Interval_s/60
+    return (c((1 + v[1] * time)^-v[2]))
 }
-  
+```
 
 
+```{r}
+u1 = 1.84
+a1 = 1.25
+
+calc_data = ebbinghaus(ebbing_data, c(u1, a1))
+calc_data_simple = simple_exponential(ebbing_data, c(u1, a1))
 ```
 
   
