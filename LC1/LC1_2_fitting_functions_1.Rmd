@@ -9,7 +9,7 @@ output:
 ```{r}
 rm(list=ls()) # clear the workspace.. always a good idea before you start a new project
 set.seed(123) # so we will all be talking about the same ranom results
-setwd("~/Dropbox/WOUTER/TEACHING/UvA/BREIN&COG/practicum/LC1/") # set to your working dir with the files you need. 
+setwd("~/Brein_en_Cognitie/LC1/") # set to your working dir with the files you need. 
 ```
 
 # 1 creating a function
@@ -47,7 +47,6 @@ In this excersise we will fit different functions to data and compare their fits
 
 
 ```{r}
-# ANSWER
 curve <- function(x){
   y=exp(1)^(.3*x)/2
   return(y)
@@ -76,8 +75,8 @@ The next step is to generate some data using this function:
 sim_data = c()
 points =seq(1,10,0.5)
 sim_data = curve(points)
-noise = runif(10, -1.5, 1.5)
-append(sim_data, noise)
+noise = runif(length(sim_data), -1.5, 1.5)
+sim_data = noise + sim_data
 
 ```
   
@@ -130,10 +129,12 @@ Generate a polynomial function: $$y=b0+b1*x+b2*x^2+b3*x^3+b4*x^4$$
 
 ```{r}
 #ANSWER
-
 polynomial<- function(data,v){
- 
-  
+  x<-data$x
+  y_hat = v[1] + v[2]*x + v[3]*x^2 + v[4]*x^3 + v[5]*x^4
+  error = y_hat-data$y
+  MSE = mean(error^2)
+  return(MSE)
 }
 ```
 
@@ -174,11 +175,14 @@ results1$value
 
 to create residul (error) lines in plot we will create an empty list and fill it with the predicted y_hat values for each x value in the data set, given the parameter we just estimated results1$par:
 ```{r}
-fit_data<-c()
-for(i in 1:nrow(dat_short)){
-  fit_data[i]<-results1$par[1]*dat_short$x[i]
+fit_linear <- function(data, v){
+  return(v*data$x)
 }
-dat_short$error1<-fit_data
+
+fit_polynomial <- function(data, v){
+  x<-data$x
+  return(v[1] + v[2]*x + v[3]*x^2 + v[4]*x^3 + v[5]*x^4)
+}
 ```
 
 Next we plot the data
@@ -203,7 +207,24 @@ Hint 2: for the starting values use c c(-5,9,-4,1,.01)
 
 ```{r}
 # ANSWER
+results1<-optim(c(0),linear,data=dat_short,method="Brent", upper=10, lower=-10)
+results1$value
+results2<-optim(c(-5,9,-4,1,.01),polynomial,data=dat_short,method="Nelder-Mead")
+results2$value
 
+dat_short$error1<-fit_linear(dat_short,results1$par)
+dat_short$error2<-fit_polynomial(dat_short,results2$par)
+
+# simply use the plot() function to plot the true data
+plot(dat_short$x,dat_short$y,ylim = c(0,5))
+# add a line with lines() that corresponds with the predicted y_hat. 
+# to do so you need to invoke the linear function b1*x and use the estimated b1
+# so in this case: results1$par[1]*dat_short$x
+lines(dat_short$x,dat_short$error1,col="green",lwd=2)
+lines(dat_short$x,dat_short$error2,col="green",lwd=2)
+# here we add segments that indicate the distance or error from the model to the data:  
+segments(dat_short$x,dat_short$y,dat_short$x,dat_short$error1, col="red",lwd=2)
+segments(dat_short$x,dat_short$y,dat_short$x,dat_short$error2, col="orange",lwd=2)
 ```
 
 
