@@ -73,7 +73,11 @@ The next step is to generate some data using this function:
 
 ```{r}
 #ANSWER
- 
+sim_data = c()
+points =seq(1,10,0.5)
+sim_data = curve(points)
+noise = runif(10, -1.5, 1.5)
+append(sim_data, noise)
 
 ```
   
