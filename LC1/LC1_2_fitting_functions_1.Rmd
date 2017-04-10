@@ -1,10 +1,11 @@
 ---
 title: "Fitting_functions"
-author: "Wouter van den Bos"
-date: "16 März 2017"
+author: "Micha de Groot (10434410) & Roan de Jong (10791930)"
+date: "10 april 2017"
 output:
-  word_document: default
+  pdf_document: default
   html_document: default
+  word_document: default
 ---
 ```{r}
 rm(list=ls()) # clear the workspace.. always a good idea before you start a new project
@@ -208,9 +209,7 @@ Hint 2: for the starting values use c c(-5,9,-4,1,.01)
 ```{r}
 # ANSWER
 results1<-optim(c(0),linear,data=dat_short,method="Brent", upper=10, lower=-10)
-results1$value
 results2<-optim(c(-5,9,-4,1,.01),polynomial,data=dat_short,method="Nelder-Mead")
-results2$value
 
 dat_short$error1<-fit_linear(dat_short,results1$par)
 dat_short$error2<-fit_polynomial(dat_short,results2$par)
@@ -221,7 +220,7 @@ plot(dat_short$x,dat_short$y,ylim = c(0,5))
 # to do so you need to invoke the linear function b1*x and use the estimated b1
 # so in this case: results1$par[1]*dat_short$x
 lines(dat_short$x,dat_short$error1,col="green",lwd=2)
-lines(dat_short$x,dat_short$error2,col="green",lwd=2)
+lines(dat_short$x,dat_short$error2,col="blue",lwd=2)
 # here we add segments that indicate the distance or error from the model to the data:  
 segments(dat_short$x,dat_short$y,dat_short$x,dat_short$error1, col="red",lwd=2)
 segments(dat_short$x,dat_short$y,dat_short$x,dat_short$error2, col="orange",lwd=2)
@@ -238,10 +237,21 @@ __hint 2__: use ylim = c(-2,12)
 
 
 ```{r}
-# ANSWER: 
+dat_full$error1<-fit_linear(dat_full,results1$par)
+dat_full$error2<-fit_polynomial(dat_full,results2$par)
+results1$value
+results2$value
 
-
-
+# simply use the plot() function to plot the true data
+plot(dat_full$x,dat_full$y,ylim = c(-2,12))
+# add a line with lines() that corresponds with the predicted y_hat. 
+# to do so you need to invoke the linear function b1*x and use the estimated b1
+# so in this case: results1$par[1]*dat_full$x
+lines(dat_full$x,dat_full$error1,col="green",lwd=2)
+lines(dat_full$x,dat_full$error2,col="blue",lwd=2)
+# here we add segments that indicate the distance or error from the model to the data:  
+segments(dat_full$x,dat_full$y,dat_full$x,dat_full$error1, col="red",lwd=2)
+segments(dat_full$x,dat_full$y,dat_full$x,dat_full$error2, col="orange",lwd=2)
 ```
 
   
@@ -417,6 +427,5 @@ ggplot() + geom_raster(data=df, aes(x = Var1, y = Var2, z=hlist, fill = hlist, i
 > Q6 Try to find the best parameters for the eggholder function!
 OK this is difficult, instead just report the results of optim() using 5 very different combinations of starting values  
 Why do you think they are different, and what do you think we can do about it ?
-
 
 
