@@ -184,6 +184,7 @@ fit_polynomial <- function(data, v){
   x<-data$x
   return(v[1] + v[2]*x + v[3]*x^2 + v[4]*x^3 + v[5]*x^4)
 }
+dat_short$error1<-fit_linear(dat_short,results1$par)
 ```
 
 Next we plot the data
@@ -195,7 +196,7 @@ plot(dat_short$x,dat_short$y,ylim = c(0,5))
 # so in this case: results1$par[1]*dat_short$x
 lines(dat_short$x,results1$par[1]*dat_short$x,col="green",lwd=2)
 # here we add segments that indicate the distance or error from the model to the data:  
-segments(dat_short$x,dat_short$y,dat_short$x,dat_short$error1, col="red",lwd=2)
+segments(dat_short$x, dat_short$y, dat_short$x, dat_short$error1, col="red",lwd=2)
 ```
 
 > Q3 Now fit the the polynomial function to the data and compare the model fits  
@@ -219,10 +220,10 @@ plot(dat_short$x,dat_short$y,ylim = c(0,5))
 # add a line with lines() that corresponds with the predicted y_hat. 
 # to do so you need to invoke the linear function b1*x and use the estimated b1
 # so in this case: results1$par[1]*dat_short$x
-lines(dat_short$x,dat_short$error1,col="green",lwd=2)
+#lines(dat_short$x,dat_short$error1,col="green",lwd=2)
 lines(dat_short$x,dat_short$error2,col="blue",lwd=2)
 # here we add segments that indicate the distance or error from the model to the data:  
-segments(dat_short$x,dat_short$y,dat_short$x,dat_short$error1, col="red",lwd=2)
+#segments(dat_short$x,dat_short$y,dat_short$x,dat_short$error1, col="red",lwd=2)
 segments(dat_short$x,dat_short$y,dat_short$x,dat_short$error2, col="orange",lwd=2)
 ```
 
@@ -292,23 +293,61 @@ __hint__ : use method="L-BFGS-B", upper=10, lower=-10 and c(2,1) as starting val
 ## ANSWER
 ebbinghaus<- function(data,v){
     time = data$Interval_s/60
-    return (c(v[1]/(log10(time)^v[2] - v[1])))
+    u1 = v[1]
+    a1 = v[2]
+    y_hat = (c(u1 / (log10(time)^a1 + u1)))
+    error = y_hat-data$Ebbinghaus
+    MSE = mean(error^2)
+    return (MSE)
 }
 
 simple_exponential<- function(data,v){
     time = data$Interval_s/60
-    return (c((1 + v[1] * time)^-v[2]))
+    y_hat = (c((1 + v[1] * time)^-v[2]))
+    error = y_hat-data$Ebbinghaus
+    MSE = mean(error^2)
+    return (MSE)
+}
+
+fit_ebbinghaus <- function(data, v){
+  time = data$Interval_s/60
+  return (c(v[1]/(log10(time)^v[2] + v[1])))
+}
+
+fit_simple_exponential <- function(data, v){
+  time = data$Interval_s/60
+  return (c((1 + v[1] * time)^-v[2]))
 }
 ```
 
 
 ```{r}
-u1 = 1.84
-a1 = 1.25
 
-calc_data = ebbinghaus(ebbing_data, c(u1, a1))
-calc_data_simple = simple_exponential(ebbing_data, c(u1, a1))
+# Fit
+results_ebbing1 <- optim(c(2.0, 1.0), ebbinghaus, data=ebbing_data, method="L-BFGS-B", upper=10, lower=-10)
+results_ebbing2 <- optim(c(2.0, 1.0), simple_exponential, data=ebbing_data, method = "L-BFGS-B", upper=10, lower=-10)
+
+# Estimate after fit
+ebbing_data$error1 = fit_ebbinghaus(ebbing_data, results_ebbing1$par)
+ebbing_data$error2 = fit_simple_exponential(ebbing_data, results_ebbing2$par)
+
+# Plot ebbinhaus function
+plot(ebbing_data$Interval_s/60, ebbing_data$Ebbinghaus)
+
+lines(ebbing_data$Interval_s/60, ebbing_data$error1, col="green", lwd=2)
+
+segments(ebbing_data$Interval_s/60, ebbing_data$Ebbinghaus, ebbing_data$Interval_s/60, ebbing_data$error1, col="red", lwd=2)
 ```
+
+```{r}
+# plot simple ebbinhaus function
+plot(ebbing_data$Interval_s/60, ebbing_data$Ebbinghaus)
+lines(ebbing_data$Interval_s/60, ebbing_data$error2, col="blue", lwd=2)
+segments(ebbing_data$Interval_s/60, ebbing_data$Ebbinghaus, ebbing_data$Interval_s/60, ebbing_data$error2, col="yellow", lwd=2)
+```
+
+# As can be seen in the plots, both functions are nearly indentical. The errors don't seem to vary that much
+
 
   
 # The fitness landscape
