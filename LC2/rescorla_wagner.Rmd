@@ -28,8 +28,7 @@ rescola <- function(v_start, v_max, alpha, num_trials)
 }
 
 num_trials = 20
-data = rescola(0, 1, 0.15, num_trials)
-data
+data = rescola(0, 10, 0.4, num_trials)
 plot(seq(from=1, to=num_trials), data$v)
 lines(seq(from=1, to=num_trials), data$v,col="black",lwd=2)
 ```
@@ -58,7 +57,24 @@ lines(seq(from=v_start, to=num_trials), data5$v,col="black",lwd=2)
 
 # Extincie curve
 
+Bij extinctie gebeurt er eigenlijk het tegenovergestelde van bij de eerdere conditionering. De assocatiesterkte met de geconditioneerde stimulus wordt na elke trial juist lager. Dit neemt af tot de associatiesterkte 0 benadert. 
+De initiele waarde van V (de associatiesterkte) is de waarde die V na de originele trails had, in dit geval ongeveer 10. Aangezien de sterkte nu omlaag gaat is de limiet (v_max) gelijk aan 0.
+
+Na één extinctie trial zien we dat V nu 5.9 is. 
+Na 11 trails is de associatieve sterkte gedaald tot onder 1% van de originele sterkte.
+
+In de onderstaande twee grafieken is te zien dat zowel de sterkte V als Delta_V en steeds langzamer dalende curve hebben met als asymptoot de V_max van 0.
+
 ```{r}
+V_start = data$v[10]
+V_max = 0
+alpha = 0.4
+num_trials = 11
+
+data_extinction = rescola(V_start, V_max, alpha, num_trials)
+data_extinction
+plot(seq(from=1, to=num_trials), data_extinction$v)
+plot(seq(from=1, to=num_trials), abs(data_extinction$delta_v))
 
 ```
 
