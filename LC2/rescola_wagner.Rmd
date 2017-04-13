@@ -1,3 +1,15 @@
+# Het rescorla Wagner model
+
+### Micha de Groot (10434410) en Roand de Jong (10791930)
+
+Het Rescorla Wagner model kan gebruikt worden om de associatieve sterkte van een geconditioneerde stimulus te modelleren. In het onderstaande voorbeeld wordt dit weergegeven voor een aantal experimenten.
+
+Het model heeft een aantal parameters die aangepast kunnen worden om verschillende experimenten en gevallen te modelleren. De associatie sterkte van de geconditioneerde stimulus verandert per leer-trial, afhankelijk van de parameters. Dit wordt berekend met de formules:
+$$V_t = V_{t-1} + \Delta V_t $$
+$$ \Delta V_t = \alpha \beta (V_{max} - V_{t-1})$$
+De eerste parameter is alfa. Alfa is een waarde tussen 0 en 1, die de sterkte van de stimulus die geconditioneerd wordt weergeeft. De tweede parameter, beta, zit ook tussen 0 en 1 en representeert de sterkte van de ongeconditioneerde stimulus.
+De maximale associatieve sterkte is V_max, die in principe elke waarde kan hebben en geen eenheid heeft. De associatiesterkte kan ook vóór de leer-trials al bestaan en kan worden meegegeven in de parameter V_start.
+
 ```{r}
 rescola <- function(v_start, v_max, alpha, num_trials)
 {
@@ -17,6 +29,7 @@ rescola <- function(v_start, v_max, alpha, num_trials)
 
 num_trials = 20
 data = rescola(0, 1, 0.15, num_trials)
+data
 plot(seq(from=1, to=num_trials), data$v)
 lines(seq(from=1, to=num_trials), data$v,col="black",lwd=2)
 ```
