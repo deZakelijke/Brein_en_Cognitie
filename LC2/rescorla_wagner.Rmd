@@ -56,3 +56,26 @@ lines(seq(from=v_start, to=num_trials), data4$v,col="black",lwd=2)
 lines(seq(from=v_start, to=num_trials), data5$v,col="black",lwd=2)
 ```
 
+# Extincie curve
+
+```{r}
+
+```
+
+# Compound Stimuli
+
+```{r}
+
+```
+
+# Blocking
+
+```{r}
+
+```
+
+# Bonus
+
+```{r}
+
+```
