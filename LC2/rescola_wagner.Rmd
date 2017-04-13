@@ -1,3 +1,24 @@
 ```{r}
+rescola <- function(v_start, v_max, alpha, num_trials)
+{
+  v_vec = c(v_start)
+  delta_v_vec = c(0)
+  
+  for(i in 2:num_trials)
+  {
+    delta_v_vec[i] = alpha*(v_max - v_vec[i-1])
+    v_vec[i] = v_vec[i-1] + delta_v_vec[i]
+  }
+  
+  data<-as.data.frame(cbind(v_vec, delta_v_vec))
+  colnames(data)<-c("v","delta_v")
+  return(data)
+}
 
+num_trials = 20
+data = rescola(0, 1, 0.15, num_trials)
+plot(seq(from=1, to=num_trials), data$v)
+lines(seq(from=1, to=num_trials), data$v,col="black",lwd=2)
 ```
+
+
