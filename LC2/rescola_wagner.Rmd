@@ -34,4 +34,25 @@ plot(seq(from=1, to=num_trials), data$v)
 lines(seq(from=1, to=num_trials), data$v,col="black",lwd=2)
 ```
 
+# De betekenis van de parameters
+
+```{r}
+v_start    = 0
+v_max      = 1
+num_trials = 20
+
+data1 = rescola(v_start, 1, 0.25, num_trials)
+data2 = rescola(v_start, 1, 0.5, num_trials)
+data3 = rescola(v_start, 1, 0.125, num_trials)
+data4 = rescola(v_start, 1, 0.1, num_trials)
+data5 = rescola(v_start, 1, 0.01, num_trials)
+
+plot(seq(v_start, num_trials), seq(0, 1, by=1/num_trials), type="n")
+
+lines(seq(from=v_start, to=num_trials), data1$v,col="black",lwd=2)
+lines(seq(from=v_start, to=num_trials), data2$v,col="black",lwd=2)
+lines(seq(from=v_start, to=num_trials), data3$v,col="black",lwd=2)
+lines(seq(from=v_start, to=num_trials), data4$v,col="black",lwd=2)
+lines(seq(from=v_start, to=num_trials), data5$v,col="black",lwd=2)
+```
 
