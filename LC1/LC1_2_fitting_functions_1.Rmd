@@ -276,7 +276,7 @@ where the u1 and a1 are free parameters and log is taken with base 10. Q(t) are 
 Later the simpler exponental function has been proposed which is described by the equation
 $$  Q(t)=(1+u1*t)^{-a1} $$
 
-where Q(t) is savings at time t and μ1 and a1 are parameters.
+where Q(t) is savings at time t and u1 and a1 are parameters.
 
 first lets import some real data:
 ```{r}
@@ -469,4 +469,23 @@ ggplot() + geom_raster(data=df, aes(x = Var1, y = Var2, z=hlist, fill = hlist, i
 OK this is difficult, instead just report the results of optim() using 5 very different combinations of starting values
 Why do you think they are different, and what do you think we can do about it ?
 
+```{r}
+fit_eggholder<- function(v){
+  x<-v[1]
+  y<-v[2]
+  f=-(y+47)*sin(sqrt(abs(x/2+(y+47))))-(x*sin(sqrt(abs(x-(y+47)))))
+  return(f)
+}
 
+result1<-optim(c(10, -10), fit_eggholder, method="L-BFGS-B", upper=10, lower=-10)
+result2<-optim(c(-500.0, -400.0), fit_eggholder, method="L-BFGS-B", upper=-400, lower=-500)
+result3<-optim(c(-230.0, -290.0), fit_eggholder, method="L-BFGS-B", upper=-230, lower=-290)
+result4<-optim(c(70.0, 170.0), fit_eggholder, method="L-BFGS-B", upper=170, lower=70)
+result5<-optim(c(300.0, 200.0), fit_eggholder, method="L-BFGS-B", upper=300, lower=200)
+result1$value
+result2$value
+result3$value
+result4$value
+result5$value
+```
+The eggholder function has a lot of local minima, it is therefore very difficult to find the global minimum using these estimation methods
