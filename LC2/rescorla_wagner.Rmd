@@ -15,52 +15,66 @@ rescola <- function(v_start, v_max, alpha, num_trials)
 {
   v_vec = c(v_start)
   delta_v_vec = c(0)
-  
-  for(i in 2:num_trials)
+
+  for(i in 2:(num_trials+1))
   {
     delta_v_vec[i] = alpha*(v_max - v_vec[i-1])
     v_vec[i] = v_vec[i-1] + delta_v_vec[i]
   }
-  
+
   data<-as.data.frame(cbind(v_vec, delta_v_vec))
   colnames(data)<-c("v","delta_v")
   return(data)
 }
 
 num_trials = 20
-data = rescola(0, 10, 0.4, num_trials)
-plot(seq(from=1, to=num_trials), data$v)
-lines(seq(from=1, to=num_trials), data$v,col="black",lwd=2)
+data = rescola(0, 1, 0.15, num_trials)
+plot(seq(from=0, to=num_trials), data$v, xlab = "Number of trials", ylab = "V")
+lines(seq(from=0, to=num_trials), data$v,col="black",lwd=2)
 ```
 
 # De betekenis van de parameters
 
+De alfa parameter
+
 ```{r}
 v_start    = 0
-v_max      = 1
-num_trials = 20
+v_max      = 100
+alpha     = 0.4
+num_trials = 10
 
-data1 = rescola(v_start, 1, 0.25, num_trials)
-data2 = rescola(v_start, 1, 0.5, num_trials)
-data3 = rescola(v_start, 1, 0.125, num_trials)
-data4 = rescola(v_start, 1, 0.1, num_trials)
-data5 = rescola(v_start, 1, 0.01, num_trials)
+data1 = rescola(v_start, v_max, alpha, num_trials)
+data1
+```
 
-plot(seq(v_start, num_trials), seq(0, 1, by=1/num_trials), type="n")
-
+```{r}
+plot(seq(v_start, num_trials), data1$v, xlab = "Number of trials", ylab = "V")
 lines(seq(from=v_start, to=num_trials), data1$v,col="black",lwd=2)
+```
+
+```{r}
+alpha = 0.2
+data2 = rescola(v_start, v_max, alpha, num_trials)
+
+plot(seq(v_start, num_trials), data1$v, xlab = "Number of trials", ylab = "V")
+lines(seq(from=v_start, to=num_trials), data1$v,col="black",lwd=2)
+points(seq(from=v_start, to=num_trials), data2$v,col="black")
 lines(seq(from=v_start, to=num_trials), data2$v,col="black",lwd=2)
-lines(seq(from=v_start, to=num_trials), data3$v,col="black",lwd=2)
-lines(seq(from=v_start, to=num_trials), data4$v,col="black",lwd=2)
-lines(seq(from=v_start, to=num_trials), data5$v,col="black",lwd=2)
+```
+
+```{r}
+plot(seq(v_start, num_trials), data1$delta_v, xlab = "Number of trials", ylab = "V")
+lines(seq(from=v_start, to=num_trials), data1$delta_v,col="black",lwd=2)
+points(seq(from=v_start, to=num_trials), data2$delta_v,col="black")
+lines(seq(from=v_start, to=num_trials), data2$delta_v,col="black",lwd=2)
 ```
 
 # Extincie curve
 
-Bij extinctie gebeurt er eigenlijk het tegenovergestelde van bij de eerdere conditionering. De assocatiesterkte met de geconditioneerde stimulus wordt na elke trial juist lager. Dit neemt af tot de associatiesterkte 0 benadert. 
+Bij extinctie gebeurt er eigenlijk het tegenovergestelde van bij de eerdere conditionering. De assocatiesterkte met de geconditioneerde stimulus wordt na elke trial juist lager. Dit neemt af tot de associatiesterkte 0 benadert.
 De initiele waarde van V (de associatiesterkte) is de waarde die V na de originele trails had, in dit geval ongeveer 10. Aangezien de sterkte nu omlaag gaat is de limiet (v_max) gelijk aan 0.
 
-Na één extinctie trial zien we dat V nu 5.9 is. 
+Na één extinctie trial zien we dat V nu 5.9 is.
 Na 11 trails is de associatieve sterkte gedaald tot onder 1% van de originele sterkte.
 
 In de onderstaande twee grafieken is te zien dat zowel de sterkte V als Delta_V en steeds langzamer dalende curve hebben met als asymptoot de V_max van 0.
@@ -75,6 +89,7 @@ data_extinction = rescola(V_start, V_max, alpha, num_trials)
 data_extinction
 plot(seq(from=1, to=num_trials), data_extinction$v)
 plot(seq(from=1, to=num_trials), abs(data_extinction$delta_v))
+
 
 ```
 
