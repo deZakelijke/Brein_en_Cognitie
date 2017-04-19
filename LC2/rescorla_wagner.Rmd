@@ -11,7 +11,7 @@ De eerste parameter is alfa. Alfa is een waarde tussen 0 en 1, die de sterkte va
 De maximale associatieve sterkte is V_max, die in principe elke waarde kan hebben en geen eenheid heeft. De associatiesterkte kan ook vóór de leer-trials al bestaan en kan worden meegegeven in de parameter V_start.
 
 ```{r}
-rescola <- function(v_start, v_max, alpha, num_trials)
+rescorla <- function(v_start, v_max, alpha, num_trials)
 {
   v_vec = c(v_start)
   delta_v_vec = c(0)
@@ -28,45 +28,36 @@ rescola <- function(v_start, v_max, alpha, num_trials)
 }
 
 num_trials = 20
-data = rescola(0, 1, 0.15, num_trials)
+data = rescorla(0, 1, 0.15, num_trials)
 plot(seq(from=0, to=num_trials), data$v, xlab = "Number of trials", ylab = "V")
 lines(seq(from=0, to=num_trials), data$v,col="black",lwd=2)
 ```
 
 # De betekenis van de parameters
-
 De alfa parameter
-
+Zoals hieronder uitgebeeld is, wordt het maximum sneller berijkt als de parameter alfa groter is. Dit zorgt er voor dat de verandering van V sneller nul benadert.  
 ```{r}
 v_start    = 0
 v_max      = 100
 alpha     = 0.4
 num_trials = 10
 
-data1 = rescola(v_start, v_max, alpha, num_trials)
-data1
-```
+data1 = rescorla(v_start, v_max, alpha, num_trials)
 
-```{r}
-plot(seq(v_start, num_trials), data1$v, xlab = "Number of trials", ylab = "V")
-lines(seq(from=v_start, to=num_trials), data1$v,col="black",lwd=2)
-```
-
-```{r}
 alpha = 0.2
-data2 = rescola(v_start, v_max, alpha, num_trials)
+data2 = rescorla(v_start, v_max, alpha, num_trials)
 
 plot(seq(v_start, num_trials), data1$v, xlab = "Number of trials", ylab = "V")
-lines(seq(from=v_start, to=num_trials), data1$v,col="black",lwd=2)
+lines(seq(from=v_start, to=num_trials), data1$v,col="green",lwd=2)
 points(seq(from=v_start, to=num_trials), data2$v,col="black")
-lines(seq(from=v_start, to=num_trials), data2$v,col="black",lwd=2)
-```
+lines(seq(from=v_start, to=num_trials), data2$v,col="blue",lwd=2)
+``` 
 
 ```{r}
-plot(seq(v_start, num_trials), data1$delta_v, xlab = "Number of trials", ylab = "V")
-lines(seq(from=v_start, to=num_trials), data1$delta_v,col="black",lwd=2)
+plot(seq(v_start, num_trials), data1$delta_v, xlab = "Number of trials", ylab = "Delta V")
+lines(seq(from=v_start, to=num_trials), data1$delta_v,col="green",lwd=2)
 points(seq(from=v_start, to=num_trials), data2$delta_v,col="black")
-lines(seq(from=v_start, to=num_trials), data2$delta_v,col="black",lwd=2)
+lines(seq(from=v_start, to=num_trials), data2$delta_v,col="blue",lwd=2)
 ```
 
 # Extincie curve
@@ -85,18 +76,58 @@ V_max = 0
 alpha = 0.4
 num_trials = 11
 
-data_extinction = rescola(V_start, V_max, alpha, num_trials)
+data_extinction = rescorla(V_start, V_max, alpha, num_trials)
 data_extinction
-plot(seq(from=1, to=num_trials), data_extinction$v)
-plot(seq(from=1, to=num_trials), abs(data_extinction$delta_v))
-
-
+plot(seq(from=v_start, to=num_trials), data_extinction$v)
+plot(seq(from=v_start, to=num_trials), abs(data_extinction$delta_v))
 ```
 
 # Compound Stimuli
-
+Bij compound stimuli wordt het leerproces beïnvloed door een samenstelling van meerdere stimuli. Deze stimuli kunnen ook een andere leersnelheid hebben. In de onderstaande grafieken is te zien hoe een leerproces sneller gaat als meerdere stimulie het proces beïnvloeden, en hoe de verandering in acquisitie verandert. 
+De compound stimuli worden uitgerekend met de volgende formules
+$$V_{ab} = V_a + V_b $$
+$$ \Delta V_a = \alpha_a (V_{max} - V_{ab-1})\\
+    \Delta V_b = \alpha_b (V_{max} - V_{ab-1})$$
 ```{r}
+rescorla_compound <- function(v_start, v_max, alpha1, alpha2, num_trials)
+{
+  v_vec1 = c(v_start)
+  v_vec2 = c(v_start)
+  v_vec_comp = c(v_start)
+  delta_v_vec1 = c(0)
+  delta_v_vec2 = c(0)
+  
+  for(i in 2:(num_trials+1))
+  {
+    delta_v_vec1[i] = alpha1*(v_max - v_vec_comp[i-1])
+    delta_v_vec2[i] = alpha2*(v_max - v_vec_comp[i-1])
+    v_vec1[i] = v_vec1[i-1] + delta_v_vec1[i]
+    v_vec2[i] = v_vec2[i-1] + delta_v_vec2[i]
+    v_vec_comp[i] = v_vec1[i] + v_vec2[i]
+  }
 
+  data<-as.data.frame(cbind(v_vec1, v_vec2, v_vec_comp, delta_v_vec1, delta_v_vec2))
+  colnames(data)<-c("v1", "v2", "v_comp","delta_v1", "delta_v2")
+  return(data)
+}
+v_start    = 0
+v_max      = 100
+alpha1     = 0.2
+alpha2     = 0.3
+num_trials = 10
+
+data1 = rescorla_compound(v_start, v_max, alpha1, alpha2, num_trials)
+plot(seq(v_start, num_trials), data1$v_comp, xlab = "Number of trials", ylab = "V")
+lines(seq(from=v_start, to=num_trials), data1$v_comp,col="black",lwd=2)
+points(seq(from=v_start, to=num_trials), data1$v2,col="black")
+lines(seq(from=v_start, to=num_trials), data1$v2,col="green",lwd=2)
+points(seq(from=v_start, to=num_trials), data1$v1,col="black")
+lines(seq(from=v_start, to=num_trials), data1$v1,col="blue",lwd=2)
+
+plot(seq(v_start, num_trials), data1$delta_v2, xlab = "Number of trials", ylab = "Delta V")
+lines(seq(from=v_start, to=num_trials), data1$delta_v2,col="blue",lwd=2)
+points(seq(from=v_start, to=num_trials), data1$delta_v1,col="black")
+lines(seq(from=v_start, to=num_trials), data1$delta_v1,col="green",lwd=2)
 ```
 
 # Blocking
