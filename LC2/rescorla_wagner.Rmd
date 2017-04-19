@@ -167,8 +167,32 @@ lines(seq(from=0, to=num_trials), data_blocking_second$v2,col="black",lwd=2)
 
 # Bonus
 
+Bij latent inhibition wordt er minder snel een associatie gemaakt tussen de CS en de US doordat de CS eerst voor een aantal trials zonder de US wordt gepresenteerd. 
+Hierdoor gaat de alfawaarde van de CS omlaag. Als dan daarna wel de Us met de CS wordt getood wordt de associatie langzamer geleerd.
+In de grafiek is te zien dat de groep die eerst de CS gepresenteerd kreeg zonder de US daarna langzamer de CS en de US met elkaar associeerde.
+
 ```{r}
+latent_inhibition <- function(alpha_start, trials, inhibition_rate){
+  new_alpha = alpha_start * inhibition_rate ^ trials
+  return (new_alpha)
+}
 
+alpha1 = 0.15
+alpha2 = 0.15
 
+inhibition_trials = 10
+inhibition_rate = 0.93
+num_trials = 20
+v_start = 0
+v_max = 1.0
+
+alpha1 = latent_inhibition(alpha1, inhibition_trials, inhibition_rate)
+data = rescorla(v_start, v_max, alpha2, num_trials)
+data_inhibited = rescorla(v_start, v_max, alpha1, num_trials)
+
+plot(seq(v_start, num_trials), data$v, xlab = "Number of trials", ylab = "V")
+lines(seq(from=v_start, to=num_trials), data$v,col="blue",lwd=2)
+points(seq(from=v_start, to=num_trials), data_inhibited$v,col="black")
+lines(seq(from=v_start, to=num_trials), data_inhibited$v,col="green",lwd=2)
 
 ```
