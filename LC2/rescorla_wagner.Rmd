@@ -5,8 +5,10 @@
 Het Rescorla Wagner model kan gebruikt worden om de associatieve sterkte van een geconditioneerde stimulus te modelleren. In het onderstaande voorbeeld wordt dit weergegeven voor een aantal experimenten.
 
 Het model heeft een aantal parameters die aangepast kunnen worden om verschillende experimenten en gevallen te modelleren. De associatie sterkte van de geconditioneerde stimulus verandert per leer-trial, afhankelijk van de parameters. Dit wordt berekend met de formules:
-$$V_t = V_{t-1} + \Delta V_t $$
+$$V_t = V_{t-1} + \Delta V_t $$ 
 $$ \Delta V_t = \alpha \beta (V_{max} - V_{t-1})$$
+
+
 De eerste parameter is alfa. Alfa is een waarde tussen 0 en 1, die de sterkte van de stimulus die geconditioneerd wordt weergeeft. De tweede parameter, beta, zit ook tussen 0 en 1 en representeert de sterkte van de ongeconditioneerde stimulus.
 De maximale associatieve sterkte is V_max, die in principe elke waarde kan hebben en geen eenheid heeft. De associatiesterkte kan ook vóór de leer-trials al bestaan en kan worden meegegeven in de parameter V_start.
 
@@ -70,6 +72,7 @@ Na 11 trails is de associatieve sterkte gedaald tot onder 1% van de originele st
 
 In de onderstaande twee grafieken is te zien dat zowel de sterkte V als Delta_V en steeds langzamer dalende curve hebben met als asymptoot de V_max van 0.
 
+
 ```{r}
 V_start = data$v[10]
 V_max = 0
@@ -78,8 +81,11 @@ num_trials = 11
 
 data_extinction = rescorla(V_start, V_max, alpha, num_trials)
 data_extinction
-plot(seq(from=v_start, to=num_trials), data_extinction$v)
-plot(seq(from=v_start, to=num_trials), abs(data_extinction$delta_v))
+plot(seq(from=v_start, to=num_trials), data_extinction$v, xlab = "Number of trials", ylab = "V")
+lines(seq(from=v_start, to=num_trials), data_extinction$v,col="green",lwd=2)
+points(seq(from=v_start, to=num_trials), abs(data_extinction$delta_v))
+lines(seq(from=v_start, to=num_trials), abs(data_extinction$delta_v),col="blue",lwd=2)
+
 ```
 
 # Compound Stimuli
@@ -131,13 +137,38 @@ lines(seq(from=v_start, to=num_trials), data1$delta_v1,col="green",lwd=2)
 ```
 
 # Blocking
+Bij blocking wordt het associeren van een CS_1 met een US geblokkeerd doordat tijdens de trials met CS_1 en de US ook een andere CS_2 getoond wordt. Deze CS_2 is al eerder geassocieerd met de US. 
+
+Doordat er dus al een associatie is tussen CS_2 en US wordt er niet een associatie aangeleerd tussen CS_1 en US.
+
+In de eerste grafiek is te zien dat de ene CS op de normale manier geassocieerd wordt. In de tweede grafiek is te zien dat de tweede stimulus erg weinig geassocieerd wordt doordat de eerste CS al geassocieerd is.
 
 ```{r}
+# train CS_1 met US
+v_start = 0
+v_max = 1.0
+num_trials = 20
+alpha1 = 0.15
+data_blocking = rescorla(v_start, v_max, alpha1, num_trials)
+
+# trials met CS_1 en CS_2 tegelijk: dwz met compound stimuli
+alpha2 = 0.15
+v_start_second = data_blocking$v[num_trials+1]
+data_blocking_second = rescorla_compound(v_start, v_max - v_start_second, alpha1, alpha2, num_trials)
+
+
+plot(seq(from=0, to=num_trials), data_blocking$v, xlab = "Number of trials", ylab = "V")
+lines(seq(from=0, to=num_trials), data_blocking$v,col="black",lwd=2)
+
+plot(seq(from=0, to=num_trials), data_blocking_second$v2, xlab = "Number of trials", ylab = "V")
+lines(seq(from=0, to=num_trials), data_blocking_second$v2,col="black",lwd=2)
 
 ```
 
 # Bonus
 
 ```{r}
+
+
 
 ```
