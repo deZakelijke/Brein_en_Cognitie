@@ -5,14 +5,118 @@ output: pdf_document
 
 # Het model
 
-```{r}
+Het Temdoral Difference Model is een algoritme dat gebruikt wordt in Reinforcement Learning. Het model voorspelt een leercurve bij conditionering. Het model kan in tegenstelling tot het Rescorla-Wagner model ook tijd meenemen in het leerproces. Het model updatet elke tijdstap de verwachte beloning voor de states in de wereld. De formule voor de verwachtingswaarde is:
+$$V(s_t) = V(s_t) + \alpha[r_{t+1} + \gamma V(s_{t+1}) - V(s_t)]$$
+$V(s_t)$ is de verwachtingswaarde ($V$) van state $s$ op tijdstip $t$. De $\alpha$ is de learningrate (een waarde tussen 0 en 1). $r_{t}$ is de beloning die je krijgt op tijdstip $t$. $\gamma$ is de discount factor, dit kan gezien worden als het tijdsverschil tussen de stimulus en de beloning. Des te meer tijdstappen er tussen de verwachte beloning en de daadwerkelijke beloning zit, des te minder belangrijk deze state wordt.
+Wij hebben in deze wereld 7 states in een één dimensionale ruimte. Onze agent begint in de middelste state, en zijn beloning bevind zich aan de rechterkant van de wereld. Elke stap loopt de agent willekeurig naar links of rechts en updatet hij de associatiesterkte van de state waar hij vandaan komt. Dit doet hij totdat hij bij één van de uiteindes van de wereld uit komt. Elke state heeft een a priori verwachtingswaarde. Die zullen van links naar rechts oplopen, omdat de enige beloning zich aan de rechterkant van de wereld bevindt. De verwachtingswaarde zal oplopen als:
+$$0 \rightarrow 1/6 \rightarrow 2/6 \rightarrow 3/6 \rightarrow 4/6 \rightarrow 5/6 \rightarrow 6/6$$
+Waar $0$ en $6/6$ de accepterende states zijn.
 
+Wanneer je dus bijvoorbeeld vanuit de een-na-laatste state naar de state met de reward beweegt, wordt de associatiesterkte van die state als volgens geupdatet met een $\alpha$ van 0.1 en 0.6:
+$$0+0.1*(1+1*0-0) = 0.1\\
+0+0.6*(1+1*0-0) = 0.6$$
+In plaats van de gevraagde functie TD_ZERO, hebben wij een functie geschreven die het model algemener oplost. Onze functie TD_learn neemt naast de attributen alpha, gamma, en episodes die TD_ZERO gebruikt, ook de state waarin de agent zijn random-walk begint en een vector die de reward van elke state in een wereld van lengte N specificeert.
+```{r}
+TD_learn <- function(begin_state, reward_mat, alpha, gamma, episodes)
+{
+  values <- integer(length(reward_mat))
+  for(i in 1:episodes)
+  {
+    current_state = begin_state
+    while(current_state != 1 && current_state != length(reward_mat))
+    {
+      if(rbinom(1, 1, 0.5) == 0)
+      {
+        next_state = current_state - 1
+      }
+      else
+      {
+        next_state  = current_state + 1
+      }
+      delta = reward_mat[next_state] + gamma*values[next_state] - values[current_state]
+      values[current_state] = values[current_state] + alpha*delta
+      current_state = next_state
+    }
+  }
+  return(values)
+}
+begin_state = 4
+reward_mat = c(0, 0, 0, 0, 0, 0, 1)
+alpha = 0.1
+gamma = 1
+episodes = 100
+
+TD_learn(begin_state, reward_mat, alpha, gamma, episodes)
 ```
 
-# De parameters
+Hieronder wordt het effect van verschillende waardes van gamma met elkaar vergeleken. Rood heeft de hoogste waarde van gamma, waardoor de vorige waarde het meeste meegenomen wordt, groen heeft een lagere waarde voor gamma, en blauw de laagste. Zoals te zien is, zorgt een hogere waarde van gamma ervoor dat states met een grotere afstand tot de reward een hogere waarde van $V$ krijgen.
+```{r}
+begin_state = 4
+reward_mat = c(0, 0, 0, 0, 0, 0, 1)
+alpha = 0.1
+episodes = 100
+
+gamma = 0.1
+data2 = TD_learn(begin_state, reward_mat, alpha, gamma, episodes)
+plot(seq(1, length(reward_mat)), data2, xlab = "State", ylab = "V", ylim =c(0, 1))
+lines(seq(1, length(reward_mat)), data2, col="blue",lwd=2)
+
+gamma = 0.5
+data1 = TD_learn(begin_state, reward_mat, alpha, gamma, episodes)
+lines(seq(1, length(reward_mat)), data1, col="green",lwd=2)
+points(seq(1, length(reward_mat)), data1, col="black")
+
+gamma = 0.9
+data3 = TD_learn(begin_state, reward_mat, alpha, gamma, episodes)
+lines(seq(1, length(reward_mat)), data3, col="red",lwd=2)
+points(seq(1, length(reward_mat)), data3, col="black")
+```
 
 ```{r}
+MSE <-function(v, expected_v)
+{
+  v_diff = v-expected_v
+  return(sum(v_diff*v_diff))
+}
 
+begin_state = 4
+reward_mat = c(0, 0, 0, 0, 0, 0, 1)
+alpha = 0.1
+gamma = 1
+episodes = 100
+
+data = TD_learn(begin_state, reward_mat, alpha, gamma, episodes)
+expected_data = c(0, 1/6, 2/6, 3/6, 4/6, 5/6, 0)
+MSE(data, expected_data)
+```
+Hieronder hebben wij de mean squared error van 2 verschillende learning rates. De groene lijn heeft een hogere learning rate dan de rode lijn. Bij een hogere learning rate $\alpha$ wordt de error sneller laag, maar de lagere learning rate berijkt na meer episodes een lagere MSE dan de groene lijn. Dit komt doordat het groene model last heeft van overfitting.
+```{r}
+TD_MSE <- function(begin_state, reward_mat, alpha, gamma, episodes, expected_v)
+{
+  MSE = numeric(episodes)
+  for(i in 1:episodes)
+  {
+    v = TD_learn(begin_state, reward_mat, alpha, gamma, i)
+    MSE[i] = MSE(v, expected_v)
+  }
+  return(MSE)
+}
+
+begin_state = 4
+reward_mat = c(0, 0, 0, 0, 0, 0, 1)
+alpha = 0.1
+gamma = 1
+episodes = 100
+expected_data = c(0, 1/6, 2/6, 3/6, 4/6, 5/6, 0)
+
+data1 = TD_MSE(begin_state, reward_mat, alpha, gamma, episodes, expected_data)
+plot(seq(1, episodes), data1, xlab = "Number of episodes", ylab = "MSE")
+lines(seq(1, episodes), data1, col="red",lwd=2)
+
+alpha = 0.7
+data2 = TD_MSE(begin_state, reward_mat, alpha, gamma, episodes, expected_data)
+points(seq(1, episodes), data2, xlab = "Number of episodes", ylab = "MSE")
+lines(seq(1, episodes), data2, col="green",lwd=2)
 ```
 
 # Temporal prediction error
