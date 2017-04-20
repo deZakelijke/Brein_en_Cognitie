@@ -1,0 +1,28 @@
+---
+title: "TD_learning"
+output: pdf_document
+---
+
+# Het model
+
+```{r}
+
+```
+
+# De parameters
+
+```{r}
+
+```
+
+# Temporal prediction error
+
+```{r}
+
+```
+
+# Eligibility traces
+
+```{r}
+
+```
