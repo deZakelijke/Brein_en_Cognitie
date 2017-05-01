@@ -120,13 +120,148 @@ lines(seq(1, episodes), data2, col="green",lwd=2)
 ```
 
 # Temporal prediction error
+Ook temporal difference learning draait op de voorspelllingsfouten tussen het model en de daadwerkelijke waarden. In de formule 
+$\delta = (Reward + \gamma * V_S[t+1]- V_S[t])$ is de voorspellingsfout weergegeven als $\delta$.
+In het volgende voorbeeld hebben we een agent die, als hij in state één komt naar state vijf gaat en daar een reward krijgt.
+Zoals in de grafiek hieroder te zien is, is er na één episode alleen een voorspellingsfout bij de vierde state. Grijze bars zijn de voorspellingsfout, de rode lijn de geleerde V waarden. De voorspellinsfout is, doordat het de eerste epsiode is en er nog niks geleerd is, een voorspellingsfout die gelijk is aan de reward in state vijf.
+Allen in state vier is de verwachtingswaarde dus verandert. In state één en vijf is die nul.
+Als de agent in een latere situatie weer bij state één arriveert en naar state vijf beweegt zal de voorsplingsfout in state vier kleiner zijn.
+
 
 ```{r}
+TD_error <- function(begin_state, reward_mat, alpha, gamma, episodes)
+{
+  values <- integer(length(reward_mat))
+  for(i in 1:episodes)
+  {
+    current_state = begin_state
+    prediction_error = c()
+    while(current_state != 5)
+    {
+      next_state = current_state + 1
+      delta = reward_mat[next_state] + gamma*values[next_state] - values[current_state]
+      prediction_error <- c(prediction_error, delta)
+      values[current_state] = values[current_state] + alpha*delta
+      current_state = next_state
+    }
+  }
+  return(list(values, prediction_error))
+}
+
+begin_state = 1
+reward_mat = c(0, 0, 0, 0, 1)
+alpha = 0.1
+gamma = 1
+episodes = 1
+
+data_error = TD_error(begin_state, reward_mat, alpha, gamma, episodes)
+
+barplot(data_error[[2]], ylim=c(0,1))
+lines(seq(1, length(reward_mat)), data_error[[1]], col="red",lwd=2)
+
+```
+
+Als er meer episodes zijn verandert de voorspelingsfout. In de grafiek hieronder, na ten episodes, is te zien dat de voorspellingsfout kleiner is geworden en de geleerde verwachtingswaarde hoger. Grijze bars zijn de voorspellingsfout, de rode lijn de geleerde V waarden. 
+In de grafiek daar onder is er voor honderd episodes geleerd. Daar is duidelijk te zien dat de agent nagenoeg geen voorspellingsfout meer heeft en geleerd heeft dat, als hij eenmal naar de vijfde state is gaan lopen, dat hij altijd een reward verwacht. In de laatste state is de verwachtingswaarde weer nul, doordat de agent in die state geen toekomsite reward verwacht.
+
+```{r}
+begin_state = 1
+reward_mat = c(0, 0, 0, 0, 1)
+alpha = 0.1
+gamma = 1
+episodes = 10
+
+data_error = TD_error(begin_state, reward_mat, alpha, gamma, episodes)
+
+barplot(data_error[[2]], ylim=c(0,1))
+lines(seq(1, length(reward_mat)), data_error[[1]], col="red",lwd=2)
+
+
+episodes = 100
+
+data_error = TD_error(begin_state, reward_mat, alpha, gamma, episodes)
+
+barplot(data_error[[2]], ylim=c(0,1))
+lines(seq(1, length(reward_mat)), data_error[[1]], col="red",lwd=2)
 
 ```
 
 # Eligibility traces
+Om het model te kunnen verbeteren kan een eligibility trace toegevoegd worden. Dit houdt in dat ook states die langer dan één tijdstap geleden bezocht zijn een update kunnen krijgen. Het bijwerken van $\delta$ wordt nu gedaan door de volgende formule: $\Delta V_{(s)} = \alpha * \delta_t * e_{(s)}$ waarbij $\delta_t$ gelijk is aan eerdere formules. De waarde van $e_{(s)}$ wordt bepaald door:
+$ e_t (s) = 1$ iff $ s=s_t$
+$ e_t (s)  = \gamma *\lambda * e_{t-1}(s)$ else
+In de onderstaande grafiek is het leerproces herhaald maar dan met de toevoeging van de eligibility trace. Er zijn drie leercurves te zien. De rode leercurve heeft $\lambda=0.8$, de groene leercurve heeft $\lambda=0.5$ en de blauwe lercurve heeft $\lambda=0.1$. Na een aantal herhalingen van het experiment zijn er geen significante verchillen te zien tussen de drie leercurves. Doordat de wereld in dit model erg klein is. Dit heeft als gevolg dat een state waar de agent relatief vor de werled lang geleden was, absoluut gezien maximaal vijf states geleden is. Hierdoor werkt de eligibility trace net als een geode toevoegin voor het model.
+
 
 ```{r}
+TD_lambda <- function(begin_state, reward_mat, alpha, gamma, episodes, lambda)
+{
+  values <- integer(length(reward_mat))
+  
+  
+  for(i in 1:episodes)
+  {
+    ET <- integer(length(reward_mat))
+    ET_prev <- integer(length(reward_mat))
+    
+    current_state = begin_state
+    while(current_state != 1 && current_state != length(reward_mat))
+    {
+      if(rbinom(1, 1, 0.5) == 0)
+      {
+        next_state = current_state - 1
+      }
+      else
+      {
+        next_state  = current_state + 1
+      }
+     
+      
+      for(i in 1:length(ET_prev)){
+        temp = ET[i]
+        ET[i] = gamma*lambda*ET_prev[i]
+        ET_prev[i] = temp
+      }
+      ET[current_state] = 1
+      
+      for(i in 2:(length(reward_mat)-1))
+      {
+        if(ET[i] != 0){
+          delta = reward_mat[next_state] + gamma*values[next_state] - values[i]
+          values[i] = values[i] + alpha*delta*ET[i]
+        }
+      }
+      
+      
+      current_state = next_state
+    }
+  }
+  return(values)
+}
 
+begin_state = 4
+reward_mat = c(0, 0, 0, 0, 0, 0, 1)
+alpha = 0.1
+gamma = 1.0
+episodes = 1000
+
+lambda = 0.8
+data_lambda_1 = TD_lambda(begin_state, reward_mat, alpha, gamma, episodes, lambda)
+
+lambda = 0.5
+data_lambda_2 = TD_lambda(begin_state, reward_mat, alpha, gamma, episodes, lambda)
+
+lambda = 0.1
+data_lambda_3 = TD_lambda(begin_state, reward_mat, alpha, gamma, episodes, lambda)
+
+
+
+plot(seq(1, length(reward_mat)), data_lambda_1, xlab = "State", ylab = "Value", ylim=c(0,1))
+lines(seq(1, length(reward_mat)), data_lambda_1, col="red",lwd=2)
+
+points(seq(1, length(reward_mat)), data_lambda_2, xlab = "State", ylab = "Value")
+lines(seq(1, length(reward_mat)), data_lambda_2, col="green",lwd=2)
+
+points(seq(1, length(reward_mat)), data_lambda_3, xlab = "State", ylab = "Value")
+lines(seq(1, length(reward_mat)), data_lambda_3, col="blue",lwd=2)
 ```
