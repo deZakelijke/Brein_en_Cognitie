@@ -1,0 +1,11 @@
+# Q-learning
+
+Micha de Groot en Roan de Jong
+
+```{r}
+Q_step <- function(){
+  
+  
+}
+```
+
