@@ -188,8 +188,8 @@ lines(seq(1, length(reward_mat)), data_error[[1]], col="red",lwd=2)
 
 # Eligibility traces
 Om het model te kunnen verbeteren kan een eligibility trace toegevoegd worden. Dit houdt in dat ook states die langer dan één tijdstap geleden bezocht zijn een update kunnen krijgen. Het bijwerken van $\delta$ wordt nu gedaan door de volgende formule: $\Delta V_{(s)} = \alpha * \delta_t * e_{(s)}$ waarbij $\delta_t$ gelijk is aan eerdere formules. De waarde van $e_{(s)}$ wordt bepaald door:
-$ e_t (s) = 1$ iff $ s=s_t$
-$ e_t (s)  = \gamma *\lambda * e_{t-1}(s)$ else
+$$ e_t (s) = 1 \Leftrightarrow s=s_t$$
+$$ e_t (s)  = \gamma *\lambda * e_{t-1}(s) \Leftrightarrow s\neq s_t$$
 In de onderstaande grafiek is het leerproces herhaald maar dan met de toevoeging van de eligibility trace. Er zijn drie leercurves te zien. De rode leercurve heeft $\lambda=0.8$, de groene leercurve heeft $\lambda=0.5$ en de blauwe lercurve heeft $\lambda=0.1$. Na een aantal herhalingen van het experiment zijn er geen significante verchillen te zien tussen de drie leercurves. Doordat de wereld in dit model erg klein is. Dit heeft als gevolg dat een state waar de agent relatief vor de werled lang geleden was, absoluut gezien maximaal vijf states geleden is. Hierdoor werkt de eligibility trace net als een geode toevoegin voor het model.
 
 
