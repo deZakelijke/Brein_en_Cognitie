@@ -2,6 +2,13 @@
 
 Micha de Groot en Roan de Jong
 
+## Q-learning uitgelegd
+Q-learning is een algoritme om te leren welke beslissingen in een bepaalde situatie de beste uitkomst heeft. Dit wordt geleerd door een aantal keer de beslissing te nemen en dan de optimale beloning te vinden. Het algoritme doet ook aan exploration om het overfitten van een bepaalde bslissing te vorkomen. Het model werkt door het verschil van de verwachte waarde en de daadwerkelijke waarde van een besissing. Aan de hand van deze fout wordt de verwachting bijgewerkt, geschaald met de leersnelheid $\alpha$, een waarde tussen 0 en 1.
+
+De andere vrije variable in het model is $\epsilon$, wat een waarde tussen 0 en 1 is. $\epsilon$ is de kans dat er willekeurige beslissing gemaakt wordt in plaats van de actie met de hoogste verwachte waarde. Dit is om het overfitten tegen te gaan.
+
+
+Hier onder staat de simpelste versie
 ```{r}
 Q_step <- function(reward, state, Q_matrix, alpha){
   delta = reward - Q_matrix[state]
@@ -37,6 +44,8 @@ Q_learn <- function(Q_matrix, alpha, epsilon, means, std, trials){
 
 ```
 
+Voor veschillende waardes van $\alpha$ en $\epsilon$ zien we verschillende resultaten. Als $\alpha$ laag is duurt het langer voordat er wat geleerd is maar de opties worden wel beter onderzocht.
+Bij een lage waarde van $\epsilon$ kan er een hoge totale reward gevonden worden doordat er minder vaak een willekeurige keuze gemaakt wordt. Het is wel zo dat dit er toe kan leiden dat er te snel een definitieve keuze voor een bepaalde actie gemaakt wordt ookal is dit niet de optimale actie.
 ```{r}
 
 
@@ -54,7 +63,7 @@ for (i in 1:length(epsilon)){
 }
 
 ```
-
+Hieronder kan je zie nwat de invloed van een hoge of lage waarde van $\epsilon$ is.
 ```{r}
 alpha = 0.3
 epsilon = c(0.05, 0.2, 0.6)
@@ -70,6 +79,7 @@ for (i in 1:length(epsilon)){
 }
 
 ```
+In een uitbreiding van het model is er een slijtagefactor voor $\epsilon$ toegevoegd die na elke iteratie $\epsilon$ verkleind. Dit zorgt er voor dat er later in het leerproces er vaker voor de hoge beloning gekozen wordt. Dit is handig omdat er dan in het begin veel onderzocht kan worden zoder dat er onnodig lang willekeurig gekozen wordt.
 
 ```{r}
 Q_learn_decay <- function(Q_matrix, alpha, epsilon, means, std, trials, decay_rate){
@@ -92,7 +102,7 @@ Q_learn_decay <- function(Q_matrix, alpha, epsilon, means, std, trials, decay_ra
   return(list(Q_matrix, reward_sum))
 }
 ```
-
+Hieronder is te zien wat de decay rate verbeterd aan het model.
 ```{r}
 alpha = 0.3
 epsilon = c(0.05, 0.2, 0.6)
@@ -108,6 +118,11 @@ for (i in 1:length(epsilon)){
   print(result[[2]])
 }
 ```
+# softmax
+
+Een andere manier om een actie te kiezen is door middel van kansen. Elke actie heeft een kans om gekozen te worden en na elke keuze worden deze kansen bijgewerkt aan de hand van de beloning die deze actie oplevert. Het verschil hier is dat je niet een hard verschil hebt tussen ontdekken en exploiteren, aangezien er de hele tijd een kansverdeling gebruikt wordt. De kansverdeling zal verder in het leren steeds meer kansenmassa toewijzen aan de beste actie.
+Dit model heeft als vrije variabele naast $\alpha$ ook $\theta$. Een goede waarde van $\theta$ in dit geval is tussen 0.05 en 0.15.
+
 ```{r}
 soft_max <- function(Q_matrix, theta){
   probabilities = integer(length(Q_matrix))
@@ -143,7 +158,7 @@ theta = seq(from=0.05, to=0.8, by=0.02)
 means = c(20, 30 ,50, 70)
 Q_matrix = integer(4)
 std = 4
-trials = 1000
+trials = 500
 results = integer(length(theta))
 
 for (j in 1:10){
@@ -153,8 +168,102 @@ for (j in 1:10){
   plot(theta, results, ylim=c(0,100000))  
 }
 
-# theta waarde tussen 0.05 en 0.15 is optimaal. Geeft de meest consistente resultaten
 
 
 ```
+### Model fitten op de data
 
+Als we nu aan de hand van ddit model gaan kijken naar al eerder vergaarde data kunnen we het gedrag van een persoon benaderen door de parameters van het model te fitten op de data. Dit berekene we me de log likelihood.
+Voor verschillende initiele waardes van de acties krijgen we de volgende optimale parameters.
+
+alpha=0.4717 theta=0.3266 voor Q start at 30
+alpha=0.6305 theta=0.2169 voor Q start at 20
+alpha=0.4892 theta=0.2318 voor Q start at 40
+```{r}
+
+# deze aanpassen voor de data file zodat we iets kunnen fitten
+
+Q_learn_smax_fit <- function(par){
+  nRounds = nrow(data)
+  nBandits = 4
+  alpha = par[1]
+  theta = par[2]
+  init = 40
+  
+  Q_matrix = rep(init, nBandits)
+  
+  log_likelihood = c()
+  
+  probabilities = integer(nBandits)
+  for (i in 1:nRounds){
+    probabilities = soft_max(Q_matrix, theta)
+    
+    choice = data$choice[i]
+    outcome = data$outcome[i]
+    log_likelihood[i] = probabilities[choice]
+    
+    Q_matrix = Q_step(outcome, choice, Q_matrix, alpha)
+  }
+  
+  
+  return(-2*sum(log(log_likelihood)))
+}
+
+
+data <- read.delim("L4_data_1.txt")
+alpha = 0.5
+theta = 0.5
+
+parameters = c(alpha, theta)
+optim(parameters, Q_learn_smax_fit, method = "L-BFGS-B", lower=c(0,0), upper=c(1,10))
+
+```
+
+Als we ook de initiele waarde van de acties vrij laten krijgen we het volgende optimale model. In dit geval gebruiken we een verschillende $\alpa$ voor positieve fouten en negatieve fouten:
+alpha_pos = 1.00000000  alpha_neg = 0.01779342  theta = 0.12260187 init_Q = 10.00000000
+
+```{r}
+
+# deze aanpassen voor de data file zodat we iets kunnen fitten
+
+Q_learn_smax_fit <- function(par){
+  nRounds = nrow(data)
+  nBandits = 4
+  alpha_positive = par[1]
+  alpha_negative = par[2]
+  theta = par[3]
+  init = par[4]
+  
+  Q_matrix = rep(init, nBandits)
+  
+  log_likelihood = c()
+  
+  probabilities = integer(nBandits)
+  for (i in 1:nRounds){
+    probabilities = soft_max(Q_matrix, theta)
+    
+    choice = data$choice[i]
+    outcome = data$outcome[i]
+    log_likelihood[i] = probabilities[choice]
+    
+    if(outcome > Q_matrix[choice]){
+      Q_matrix = Q_step(outcome, choice, Q_matrix, alpha_positive)
+    }else{
+      Q_matrix = Q_step(outcome, choice, Q_matrix, alpha_negative)
+    }
+  }
+  
+  
+  return(-2*sum(log(log_likelihood)))
+}
+
+
+data <- read.delim("L4_data_1.txt")
+alpha_positive = 0.5
+alpha_negative = 0.5
+theta = 0.5
+q_init = 30
+
+parameters = c(alpha_positive, alpha_negative, theta, q_init)
+optim(parameters, Q_learn_smax_fit, method = "L-BFGS-B", lower=c(0,0), upper=c(1,10))
+```
