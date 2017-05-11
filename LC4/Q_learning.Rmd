@@ -1,6 +1,11 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 # Q-learning
 
-Micha de Groot en Roan de Jong
+Micha de Groot (10434410) en Roan de Jong (10791930)
 
 ## Q-learning uitgelegd
 Q-learning is een algoritme om te leren welke beslissingen in een bepaalde situatie de beste uitkomst heeft. Dit wordt geleerd door een aantal keer de beslissing te nemen en dan de optimale beloning te vinden. Het algoritme doet ook aan exploration om het overfitten van een bepaalde bslissing te vorkomen. Het model werkt door het verschil van de verwachte waarde en de daadwerkelijke waarde van een besissing. Aan de hand van deze fout wordt de verwachting bijgewerkt, geschaald met de leersnelheid $\alpha$, een waarde tussen 0 en 1.
@@ -219,7 +224,7 @@ optim(parameters, Q_learn_smax_fit, method = "L-BFGS-B", lower=c(0,0), upper=c(1
 
 ```
 
-Als we ook de initiele waarde van de acties vrij laten krijgen we het volgende optimale model. In dit geval gebruiken we een verschillende $\alpa$ voor positieve fouten en negatieve fouten:
+Als we ook de initiele waarde van de acties vrij laten krijgen we het volgende optimale model. In dit geval gebruiken we een verschillende $\alpha$ voor positieve fouten en negatieve fouten:
 alpha_pos = 1.00000000  alpha_neg = 0.01779342  theta = 0.12260187 init_Q = 10.00000000
 
 ```{r}
