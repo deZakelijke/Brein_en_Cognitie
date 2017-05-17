@@ -7,6 +7,14 @@ output:
 
 Micha de Groot (10434410) en Roan de Jong (10791930)
 
+
+# Theorie achter het model
+
+Prospect theory modelleert hoe mensen keuzes maken tussen bepaalde opties. Het model geeft weer hoe mensen hoge waardes relatief lager evalueren dan lage waardes en kansen die extreme waardes hebben (dicht bij 0 of 1) verkeerd inschatten. Het model heeft een aantal parameters: $\alpha$ voor de devaluering van positieve waardes met de formule $x^\alpha$. $\beta$ en $\lambda$ voor de devaluering van negatieve waardes met de formule $-\lambda*(-x)^\beta$. Voor het herevalueren van de kansen die een geberutenis hebben is er de vrije variabele $\gamma$. Die worden geschaald door $p^\gamma/((p^\gamma+(1-p)^\gamma)^{1/\gamma})$.\\
+Hoe daarna de verwachtingswaarde wordt berekend is op dezelfde manier als bij objectieve kansen, nemlijk door de som van de kansen keer de waardes te nemen.\\
+
+Hieronder staan de basisfuncties die dit berekenen.
+
 ## Subjectieve uitkomsten
 ```{r}
 weighted_values <- function(values, alpha, beta, lambda){
@@ -43,6 +51,8 @@ expected_utility <- function(probabilities, values, alpha, beta, gamma, lambda){
 }
 ```
 
+Welek optie dan het waarschijnlijkst is om gekozen te worden wordt berekend door de sigmoidfunctie van het verschil in verwachtingswaardes te berekenen. Deze functie heeft als vrije parameter $\theta$. Deze parameter vormt de steilheid van de sigmoid curve.
+
 ## Softmax voor subjectieve verwachtingswaarde
 ```{r}
 risk <- function(probabilities, values, expected_values){
@@ -60,6 +70,8 @@ soft_max <- function(utilities, theta){
 }
 ```
 
+
+Als we nu het effect van het devalueren van positieve waardes bekijken zien we de volgende grafiek voor verschillende waardes voor $\alpha$. Aangezien mensen risicomijdend zijn komt de grafiek met een $\alpha$ waarde van $0.5$ het beste overeen met de werkelijkheid.
 
 ## Plot van objectieve waarden 
 ```{r}
@@ -83,6 +95,8 @@ alpha = 0.5
 w_values = weighted_values(values, alpha, beta, lambda)
 lines(values, w_values, col="red",lwd=2)
 ```
+
+Vervolgens kijken we naar verschillende waardes van $\beta$ en $\lambda$ voor negatieve waardes. Dit resulteert in de onderstaande grafiek. Een $\lamda$ van $1.5$ modelleert het gedrag van mensen het beste.
 
 ## Plot van negatieve objectieve waarden 
 ```{r}
@@ -108,6 +122,7 @@ w_values = weighted_values(values, alpha, beta, lambda)
 lines(values, w_values, col="red",lwd=2)
 ```
 
+Als laatse moet gezocht worden naar de waarde voor $\gamma$. Deze zou er tot moeten leiden dat er een snelle steiging is in het gebied net rechts van $0$, dan langzaam stijgt en dan weer snel stijgt dicht bij $1$. Een $\gamma$ van 0.5 komt hiermee overeen.
 ## Plot van waarschijnlijkheidsfuncties
 ```{r}
 probabilities = seq(from=0.001, to=0.999, by=0.001)
@@ -125,6 +140,8 @@ probabilities_w = weighted_probabilities(probabilities, gamma)
 lines(probabilities, probabilities_w, col="green", lwd=2)
 lines(c(0,1), c(0,1), col='black', lwd=2)
 ```
+Om te begrijpen wat het effect van de parameters zijn op de keuzes die mensen maken kijken we naar het volgende voorbeeld. We hebben een keuze met een hoge waarde die een lage kans heeft en een lagere waarde die een hogere kans heeft. We zien uit de getallen dat er bij de eerste twee proeven, met een $\alpha$ van $0.3$ dat de keuze met een lage waarde en hogere kans waarschijnlijker is om gekozen te worden.
+In de laatste twee proeven, met een $\alpha$ van $1.5$, wordt duidelijk de keuze met een hoge waarde bevoordeeld.
 
 ## Vergelijking van parameters
 ```{r}
@@ -139,6 +156,7 @@ gamma = 0.5
 lambda = 0
 utility_1 = expected_utility(probabilities_1, values_1, alpha, beta, gamma, lambda)
 utility_2 = expected_utility(probabilities_2, values_2, alpha, beta, gamma, lambda)
+print("First prob | second prob")
 c(utility_1, utility_2)
 
 gamma = 1
@@ -158,6 +176,10 @@ utility_2 = expected_utility(probabilities_2, values_2, alpha, beta, gamma, lamb
 c(utility_1, utility_2)
 ```
 
+# Het model toegepast in de praktijk
+
+Om de parameters achter het gedrag van specifieke personen te achterhalen gaan we data van die personen op het model voegen. Een aantal proefpersonen hebben van te voren een vragenlijst ingevuld waar ze bij elke vraag een keus moeten maken tussen twee lotingen die beide een andere kansverdeling en andere uitkomstenwaardes hebben.\\
+Met startwaardes van $0.5, 0.5, 0.5, 0.5, 0.05$ voor respectievelijk $\alpha, \beta, \lambda, \gamma, \theta$ komen er de volgende optimale parametrs uit voor proefpersoon 1:
 ```{r}
 CPT_fit <- function(v) {
   
@@ -202,9 +224,10 @@ data<-read.delim("data_LC5.txt")
 data<-subset(data, data$subject==1)
 optim(c(0.5, 0.5, 0.5, 0.5, 0.05), CPT_fit)
 ```
-
+Hier is maar een klein verschil te zien tussen de startwaardes en de waardes die som van de log error minimaliseren. Dit komt doordat er vele lokale minima zijn. Om dit te voorkomen initialiseren we de waardes willekeurig en testen we het een aantal keer. Als we dan kijken naar de log error zien we een sterke verbetering. De error is met ongeveer een factor tien verlaagd.
 ```{r}
 CPT_random <- function(iterations){
+  set.seed(123)
   minimums = integer(iterations)
   parameters = list()
   
@@ -227,3 +250,18 @@ v = CPT_random(100)
 CPT_fit(v[[1]])
 CPT_fit(c(0.5, 0.5, 0.5, 0.5, 0.05))
 ```
+Als laatste kijken we naar de profielen van onszelf. Aan de parameterwaardes is te zien dat we beide op redelijk dezelfde manier keuzes maken. Uitde hoge lambda waardes blijkt dat we veel risico nemen.
+```{r}
+
+
+data = read.delim("10434410_DATA.txt") # Micha
+v_1 = CPT_random(100)
+CPT_fit(v_1[[1]])
+v_1[[1]]
+
+data = read.delim("10791930_DATA.txt") # Roan
+v_2 = CPT_random(100)
+CPT_fit(v_2[[1]])
+v_2[[1]]
+```
+
