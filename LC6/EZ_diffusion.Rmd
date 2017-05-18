@@ -1,0 +1,8 @@
+# EZ diffusion
+
+Micha de Groot-10434410 En Roand de Jong-10791930
+
+```{r}
+
+```
+
